@@ -33,6 +33,7 @@
 			isa = PBXGroup;
 			children = (
 				3460D0A12D46156A0001FA52 /* Dragon */,
+				3460D0CC2D4624870001FA52 /* Frameworks */,
 				3460D0A02D46156A0001FA52 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -43,6 +44,13 @@
 				3460D09F2D46156A0001FA52 /* Dragon.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		3460D0CC2D4624870001FA52 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
