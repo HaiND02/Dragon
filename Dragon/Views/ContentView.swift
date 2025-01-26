@@ -11,40 +11,35 @@ struct ContentView: View {
     }
     
     var body: some View {
-        Group {
+        ZStack {
             if authViewModel.isAuthenticated {
                 if showWelcome {
                     WelcomeView(
                         showWelcome: $showWelcome,
                         userName: authViewModel.currentUser?.fullName ?? ""
                     )
-                    .transition(.opacity)
+                    .transition(.asymmetric(
+                        insertion: .scale.combined(with: .opacity),
+                        removal: .scale.combined(with: .opacity)
+                    ))
                 } else {
                     // Main App View
-                    NavigationView {
-                        VStack {
-                            Text("Xin chào, \(authViewModel.currentUser?.fullName ?? "")")
-                            
-                            Button(action: {
-                                authViewModel.logout()
-                            }) {
-                                Text("Đăng Xuất")
-                                    .foregroundColor(.white)
-                                    .frame(maxWidth: .infinity)
-                                    .padding()
-                                    .background(Color.red)
-                                    .cornerRadius(10)
-                            }
-                            .padding()
-                        }
-                        .navigationTitle("Trang Chủ")
-                    }
-                    .transition(.opacity)
+                    HomeView(viewModel: authViewModel)
+                        .transition(.asymmetric(
+                            insertion: .move(edge: .trailing),
+                            removal: .move(edge: .leading)
+                        ))
                 }
             } else {
                 LoginView(viewModel: authViewModel)
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .leading),
+                        removal: .move(edge: .trailing)
+                    ))
             }
         }
+        .animation(.spring(response: 0.5, dampingFraction: 0.8), value: authViewModel.isAuthenticated)
+        .animation(.spring(response: 0.5, dampingFraction: 0.8), value: showWelcome)
         .onChange(of: authViewModel.isAuthenticated) { oldValue, newValue in
             if newValue && authViewModel.isNewUser {
                 showWelcome = true
