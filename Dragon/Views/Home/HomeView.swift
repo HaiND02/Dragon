@@ -3,12 +3,13 @@ import SwiftUI
 struct HomeView: View {
     @ObservedObject var viewModel: AuthViewModel
     @State private var isAnimating = false
+    @Environment(\.colorScheme) private var colorScheme
     
     var body: some View {
         NavigationView {
             ZStack {
                 // Background gradient
-                AppStyles.backgroundGradient()
+                AppStyles.backgroundGradient(colorScheme: colorScheme)
                     .ignoresSafeArea()
                 
                 VStack(spacing: 30) {

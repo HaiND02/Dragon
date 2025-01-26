@@ -2,6 +2,7 @@ import SwiftUI
 import CoreData
 
 struct LoginView: View {
+    @Environment(\.colorScheme) var colorScheme
     @ObservedObject var viewModel: AuthViewModel
     @State private var email = ""
     @State private var password = ""
@@ -11,15 +12,12 @@ struct LoginView: View {
     var body: some View {
         ZStack {
             // Background gradient
-            AppStyles.backgroundGradient()
+            AppStyles.backgroundGradient(colorScheme: colorScheme)
                 .ignoresSafeArea()
             
             VStack(spacing: 30) {
                 // Logo
-                Image(systemName: "person.circle.fill")
-                    .resizable()
-                    .frame(width: 100, height: 100)
-                    .foregroundColor(AppColors.primary)
+                DragonLogoView(size: 120)
                     .padding(.top, 50)
                     .scaleEffect(isAnimating ? 1.0 : 0.5)
                 
@@ -31,10 +29,9 @@ struct LoginView: View {
                 
                 VStack(spacing: 20) {
                     // Email field
-                    AppStyles.inputField(icon: "envelope") {
-                        TextField("Email", text: $email)
-                    }
-                    .offset(x: isAnimating ? 0 : -UIScreen.main.bounds.width)
+                    TextInputView(text: $email, placeholder: "Email", icon: "envelope")
+                        .padding(.horizontal)
+                        .offset(x: isAnimating ? 0 : -UIScreen.main.bounds.width)
                     
                     if !viewModel.isValidEmail(email) && !email.isEmpty {
                         Text("Email không hợp lệ")
@@ -43,10 +40,9 @@ struct LoginView: View {
                     }
                     
                     // Password field
-                    AppStyles.inputField(icon: "lock") {
-                        SecureField("Mật khẩu", text: $password)
-                    }
-                    .offset(x: isAnimating ? 0 : UIScreen.main.bounds.width)
+                    SecureInputView(text: $password, placeholder: "Mật khẩu")
+                        .padding(.horizontal)
+                        .offset(x: isAnimating ? 0 : UIScreen.main.bounds.width)
                     
                     if !viewModel.isValidPassword(password) && !password.isEmpty {
                         Text("Mật khẩu phải có ít nhất 6 ký tự")

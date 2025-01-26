@@ -4,11 +4,12 @@ struct WelcomeView: View {
     @Binding var showWelcome: Bool
     let userName: String
     @State private var isAnimating = false
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         ZStack {
             // Background gradient
-            AppStyles.backgroundGradient()
+            AppStyles.backgroundGradient(colorScheme: colorScheme)
                 .ignoresSafeArea()
             
             // Animated circles background
@@ -60,7 +61,7 @@ struct WelcomeView: View {
                     
                     Text("Xin chào, \(userName)!")
                         .font(.title2)
-                        .foregroundColor(AppColors.textSecondary)
+                        .foregroundColor(AppColors.secondaryText)
                     
                     Text("Đăng ký thành công")
                         .font(.headline)

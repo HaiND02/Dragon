@@ -9,6 +9,7 @@ struct RegisterView: View {
     @State private var confirmPassword = ""
     @State private var fullName = ""
     @State private var isAnimating = false
+    @Environment(\.colorScheme) var colorScheme
     
     init(viewModel: AuthViewModel) {
         self.viewModel = viewModel
@@ -17,7 +18,7 @@ struct RegisterView: View {
     var body: some View {
         ZStack {
             // Background gradient
-            AppStyles.backgroundGradient()
+            AppStyles.backgroundGradient(colorScheme: colorScheme)
                 .ignoresSafeArea()
             
             ScrollView {
@@ -32,24 +33,22 @@ struct RegisterView: View {
                     
                     VStack(spacing: 20) {
                         // Full name field
-                        AppStyles.textField(text: $fullName,
-                                          placeholder: "Họ và tên",
-                                          icon: "person")
+                        TextInputView(text: $fullName, placeholder: "Họ và tên", icon: "person")
+                            .padding(.horizontal)
                             .offset(x: isAnimating ? 0 : -UIScreen.main.bounds.width)
                         
                         // Email field
-                        AppStyles.textField(text: $email,
-                                          placeholder: "Email",
-                                          icon: "envelope")
+                        TextInputView(text: $email, placeholder: "Email", icon: "envelope")
+                            .padding(.horizontal)
                             .offset(x: isAnimating ? 0 : UIScreen.main.bounds.width)
                         
                         // Password fields
-                        AppStyles.secureField(text: $password,
-                                            placeholder: "Mật khẩu")
+                        SecureInputView(text: $password, placeholder: "Mật khẩu")
+                            .padding(.horizontal)
                             .offset(x: isAnimating ? 0 : -UIScreen.main.bounds.width)
                         
-                        AppStyles.secureField(text: $confirmPassword,
-                                            placeholder: "Xác nhận mật khẩu")
+                        SecureInputView(text: $confirmPassword, placeholder: "Xác nhận mật khẩu")
+                            .padding(.horizontal)
                             .offset(x: isAnimating ? 0 : UIScreen.main.bounds.width)
                     }
                     .padding(.horizontal)
