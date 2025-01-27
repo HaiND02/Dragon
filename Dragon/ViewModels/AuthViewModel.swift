@@ -3,11 +3,14 @@ import CoreData
 import SwiftUI
 
 class AuthViewModel: ObservableObject {
+    static let shared = AuthViewModel(context: PersistenceController.shared.container.viewContext)
+    
     @Published var currentUser: User?
     @Published var isAuthenticated = false
     @Published var errorMessage = ""
     @Published var showError = false
     @Published var isNewUser = false
+    @Published private var userImages: [String: UIImage] = [:]
     
     let context: NSManagedObjectContext
     
@@ -142,6 +145,9 @@ class AuthViewModel: ObservableObject {
         UserDefaults.standard.removeObject(forKey: "userEmail")
         UserDefaults.standard.synchronize()
         
+        // Clear image cache when logging out
+        clearAllImageCache()
+        
         // Reset states
         DispatchQueue.main.async {
             self.currentUser = nil
@@ -170,5 +176,79 @@ class AuthViewModel: ObservableObject {
                 print("Lỗi kiểm tra trạng thái: \(error)")
             }
         }
+    }
+    
+    func updateUserProfile(fullName: String, phone: String, location: String, image: UIImage?) {
+        if let user = currentUser, let email = user.email {
+            user.fullName = fullName
+            user.phone = phone
+            user.location = location
+            
+            if let image = image {
+                // Lưu ảnh vào dictionary với key là email
+                userImages[email] = image
+                
+                if let imageUrl = saveImageToFileManager(image: image, fileName: "\(email)_profile") {
+                    user.avatarUrl = imageUrl.path
+                }
+            }
+            
+            do {
+                try context.save()
+                objectWillChange.send()
+            } catch {
+                print("Error saving context: \(error)")
+            }
+        }
+    }
+    
+    private func saveImageToFileManager(image: UIImage, fileName: String) -> URL? {
+        guard let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first,
+              let imageData = image.jpegData(compressionQuality: 0.7) else {
+            return nil
+        }
+        
+        let fileURL = documentsDirectory.appendingPathComponent("\(fileName).jpg")
+        
+        do {
+            try imageData.write(to: fileURL)
+            return fileURL
+        } catch {
+            print("Error saving image: \(error)")
+            return nil
+        }
+    }
+    
+    func loadProfileImage(for user: User) -> UIImage? {
+        guard let email = user.email else { return nil }
+        
+        // Kiểm tra trong memory cache trước
+        if let cachedImage = userImages[email] {
+            return cachedImage
+        }
+        
+        // Nếu không có trong cache, load từ file system
+        guard let avatarUrl = user.avatarUrl else { return nil }
+        let url = URL(fileURLWithPath: avatarUrl)
+        
+        do {
+            let imageData = try Data(contentsOf: url)
+            if let image = UIImage(data: imageData) {
+                // Cache lại ảnh vừa load được
+                userImages[email] = image
+                return image
+            }
+        } catch {
+            print("Error loading image: \(error)")
+        }
+        return nil
+    }
+    
+    func clearImageCache(for email: String) {
+        userImages.removeValue(forKey: email)
+    }
+    
+    func clearAllImageCache() {
+        userImages.removeAll()
     }
 } 

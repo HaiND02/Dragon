@@ -2,94 +2,113 @@ import SwiftUI
 
 struct HomeView: View {
     @ObservedObject var viewModel: AuthViewModel
-    @State private var isAnimating = false
-    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
-        NavigationView {
-            ZStack {
-                // Background gradient
-                AppStyles.backgroundGradient(colorScheme: colorScheme)
-                    .ignoresSafeArea()
+        ScrollView {
+            VStack(spacing: 20) {
+                // Stories
+                StoriesView(viewModel: viewModel)
                 
-                VStack(spacing: 30) {
-                    // Welcome message
-                    VStack(spacing: 10) {
-                        Text("Xin chào,")
-                            .font(.title)
-                            .foregroundColor(AppColors.text.opacity(0.8))
-                        
-                        Text(viewModel.currentUser?.fullName ?? "")
-                            .font(.title)
-                            .bold()
-                            .foregroundColor(AppColors.primary)
-                    }
-                    .card()
-                    .animatedContent(isAnimating: isAnimating)
-                    
-                    // User info card
-                    VStack(spacing: 15) {
-                        HStack {
-                            Image(systemName: "person.circle.fill")
-                                .font(.system(size: 60))
-                                .foregroundColor(AppColors.primary)
-                            
-                            VStack(alignment: .leading, spacing: 5) {
-                                Text(viewModel.currentUser?.fullName ?? "")
-                                    .font(.headline)
-                                Text(viewModel.currentUser?.email ?? "")
-                                    .font(.subheadline)
-                                    .foregroundColor(.gray)
-                            }
-                            Spacer()
-                        }
-                        .padding()
-                    }
-                    .card()
-                    .scaleEffect(isAnimating ? 1 : 0.8)
-                    .opacity(isAnimating ? 1 : 0)
-                    
-                    Spacer()
-                    
-                    // Logout button
-                    Button(action: {
-                        withAnimation(.spring()) {
-                            viewModel.logout()
-                        }
-                    }) {
-                        HStack {
-                            Image(systemName: "rectangle.portrait.and.arrow.right")
-                            Text("Đăng Xuất")
-                        }
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(
-                            LinearGradient(
-                                colors: [Color.red, Color.red.opacity(0.8)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .cornerRadius(15)
-                        .shadow(radius: 5)
-                    }
-                    .padding(.horizontal)
-                    .offset(y: isAnimating ? 0 : 50)
-                    .opacity(isAnimating ? 1 : 0)
+                // Posts
+                ForEach(0..<10) { _ in
+                    PostView()
                 }
-                .padding(.top, 50)
-            }
-            .navigationBarHidden(true)
-        }
-        .onAppear {
-            withAnimation(.spring(response: 0.8, dampingFraction: 0.8)) {
-                isAnimating = true
             }
         }
+        .navigationTitle("Dragon")
+        .navigationBarTitleDisplayMode(.inline)
+        .background(
+            AppStyles.backgroundGradient(colorScheme: colorScheme)
+                .ignoresSafeArea()
+        )
+    }
+}
+
+struct StoriesView: View {
+    @ObservedObject var viewModel: AuthViewModel
+    
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 15) {
+                // Current User Story
+                if let currentUser = viewModel.currentUser {
+                    VStack {
+                        ProfileImage(viewModel: viewModel, user: currentUser, size: 65)
+                        Text("Tin của bạn")
+                            .font(.caption)
+                    }
+                }
+                
+                // Other Stories
+                ForEach(0..<5) { _ in
+                    VStack {
+                        Circle()
+                            .fill(AppColors.cardBackground)
+                            .frame(width: 65, height: 65)
+                            .overlay(
+                                Image(systemName: "person")
+                                    .foregroundColor(AppColors.primary)
+                            )
+                        Text("User")
+                            .font(.caption)
+                    }
+                }
+            }
+            .padding(.horizontal)
+        }
+    }
+}
+
+struct PostView: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Post Header
+            HStack {
+                Circle()
+                    .fill(AppColors.cardBackground)
+                    .frame(width: 40, height: 40)
+                    .overlay(
+                        Image(systemName: "person")
+                            .foregroundColor(AppColors.primary)
+                    )
+                
+                Text("Username")
+                    .fontWeight(.medium)
+                
+                Spacer()
+            }
+            .padding(.horizontal)
+            
+            // Post Content
+            Rectangle()
+                .fill(AppColors.cardBackground)
+                .frame(height: 300)
+                .overlay(
+                    Image(systemName: "photo")
+                        .foregroundColor(AppColors.primary)
+                )
+            
+            // Post Actions
+            HStack(spacing: 20) {
+                Button(action: {}) {
+                    Image(systemName: "heart")
+                }
+                
+                Button(action: {}) {
+                    Image(systemName: "bubble.right")
+                }
+                
+                Spacer()
+            }
+            .padding(.horizontal)
+            .foregroundColor(AppColors.text)
+        }
+        .padding(.vertical, 10)
     }
 }
 
 #Preview {
     HomeView(viewModel: AuthViewModel(context: PersistenceController.preview.container.viewContext))
 } 
+
